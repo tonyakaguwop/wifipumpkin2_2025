@@ -1,188 +1,130 @@
-![logo](https://raw.githubusercontent.com/P0cL4bs/WiFi-Pumpkin/master/icons/logo.png)
+# WiFiPumpkin Python 3 Modernization
 
-WiFi-Pumpkin
----
-[![build](https://travis-ci.org/P0cL4bs/WiFi-Pumpkin.svg)](https://travis-ci.org/P0cL4bs/WiFi-Pumpkin/)
+This repository contains a fork of [WiFiPumpkin](https://github.com/my0aung/wifipumpkin) with the goal of modernizing the codebase to work with Python 3.
 
-Framework for Rogue Wi-Fi Access Point Attack
-### Description
-WiFi-Pumpkin is a very complete framework for auditing Wi-Fi security. The main feature is the ability to create a fake AP and make Man In The Middle attack, but the list of features is quite broad.
+## Background
 
-![screenshot](https://i.imgur.com/bNTOHLq.png)
+WiFiPumpkin was originally written for Python 2, which reached its end of life on January 1, 2020. This project aims to update the codebase to be compatible with Python 3 while maintaining all functionality.
 
-### Installation
+## Modernization Process
 
-- Python 2.7
-```sh
- git clone https://github.com/P0cL4bs/WiFi-Pumpkin.git
- cd WiFi-Pumpkin
- ./installer.sh --install
-```
-or download [.deb](https://github.com/P0cL4bs/WiFi-Pumpkin/releases) file to install
-``` sh
-sudo dpkg -i wifi-pumpkin-0.8.5-all.deb
-sudo apt-get -f install # force install dependencies if not install normally
+There are several methods to convert Python 2 code to Python 3. This guide outlines the steps to modernize the WiFiPumpkin codebase.
 
-```
+### Method 1: Using 2to3 Tool
 
-refer to the wiki for [Installation](https://github.com/P0cL4bs/WiFi-Pumpkin/wiki/Installation)
+The `2to3` tool is included with Python 3 and automates much of the conversion process.
 
-### Features
-* Rogue Wi-Fi Access Point
-* Deauth Attack Clients AP 
-* Probe Request Monitor
-* DHCP Starvation Attack
-* Credentials Monitor
-* Transparent Proxy
-* Windows Update Attack
-* Phishing Manager
-* Partial Bypass HSTS protocol
-* Support beef hook
-* ARP Poison 
-* DNS Spoof 
-* Patch Binaries via MITM
-* Karma Attacks (support hostapd-mana)
-* LLMNR, NBT-NS and MDNS poisoner (Responder)
-* Pumpkin-Proxy (ProxyServer (mitmproxy API))
-* Capture images on the fly
-* TCP-Proxy (with [scapy](http://www.secdev.org/projects/scapy/))
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/tonyakaguwop/wifipumpkin.git
+   cd wifipumpkin
+   ```
 
-### Donation
-##### Patreon:
-[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/wifipumpkin)
-##### paypal:
-[![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PUPJEGHLJPFQL)
-##### Via BTC:
-1HBXz6XX3LcHqUnaca5HRqq6rPUmA3pf6f
+2. Install the required package if missing:
+   ```bash
+   sudo apt-get install python3-lib2to3
+   ```
 
-### Plugins
-| Plugin | Description | 
-|:-----------|:------------|
-[Dns2proxy](https://github.com/LeonardoNve/dns2proxy) | This tools offer a different features for post-explotation once you change the DNS server to a Victim.
-[Sstrip2](https://github.com/LeonardoNve/sslstrip2) | Sslstrip is a MITM tool that implements Moxie Marlinspike's SSL stripping attacks based version fork @LeonardoNve/@xtr4nge.
-[Sergio_proxy](https://github.com/supernothing/sergio-proxy) | Sergio Proxy (a Super Effective Recorder of Gathered Inputs and Outputs) is an HTTP proxy that was written in Python for the Twisted framework.
-[BDFProxy](https://github.com/davinerd/BDFProxy-ng) | Patch Binaries via MITM: BackdoorFactory + mitmProxy, bdfproxy-ng is a fork and review of the original BDFProxy @secretsquirrel.
-[Responder](https://github.com/lgandx/Responder) | Responder an LLMNR, NBT-NS and MDNS poisoner. Author: Laurent Gaffie
+3. Run the conversion tool:
+   ```bash
+   2to3 -w .
+   ```
+   The `-w` flag writes changes directly to the files instead of just showing the diffs.
 
-### Transparent Proxy
-![proxy](https://raw.githubusercontent.com/P0cL4bs/WiFi-Pumpkin/master/docs/proxyscenario.png)
+### Method 2: Using Modernize
 
- Transparent proxies(mitmproxy) that you can use to intercept and manipulate HTTP traffic modifying requests and responses, that allow to inject javascripts into the targets visited.  You can easily implement a module to inject data into pages creating a python file in directory "plugins/extension/" automatically will be listed on Pumpkin-Proxy tab.
-#### Plugins Example Dev
+The `modernize` tool is an enhanced version of `2to3` that produces more idiomatic Python 3 code that's also compatible with Python 2.
 
- ``` python
-from mitmproxy.models import decoded # for decode content html
-from plugins.extension.plugin import PluginTemplate
+1. Create a virtual environment to avoid permission issues:
+   ```bash
+   python3 -m venv ~/wifipumpkin_env
+   source ~/wifipumpkin_env/bin/activate
+   ```
 
-class Nameplugin(PluginTemplate):
-    meta = {
-        'Name'      : 'Nameplugin',
-        'Version'   : '1.0',
-        'Description' : 'Brief description of the new plugin',
-        'Author'    : 'by dev'
-    }
-    def __init__(self):
-        for key,value in self.meta.items():
-            self.__dict__[key] = value
-        # if you want set arguments check refer wiki more info. 
-        self.ConfigParser = False # No require arguments 
+2. Install modernize:
+   ```bash
+   pip install modernize
+   ```
 
-    def request(self, flow):
-        print flow.__dict__
-        print flow.request.__dict__ 
-        print flow.request.headers.__dict__ # request headers
-        host = flow.request.pretty_host # get domain on the fly requests 
-        versionH = flow.request.http_version # get http version 
-        
-        # get redirect domains example
-        # pretty_host takes the "Host" header of the request into account,
-        if flow.request.pretty_host == "example.org":
-            flow.request.host = "mitmproxy.org"
-            
-        # get all request Header example 
-        self.send_output.emit("\n[{}][HTTP REQUEST HEADERS]".format(self.Name))
-        for name, valur in flow.request.headers.iteritems():
-            self.send_output.emit('{}: {}'.format(name,valur))
-            
-        print flow.request.method # show method request 
-        # the model printer data
-        self.send_output.emit('[NamePlugin]:: this is model for save data logging')
+3. Run modernize:
+   ```bash
+   python -m libmodernize -w .
+   ```
 
-    def response(self, flow):
-        print flow.__dict__
-        print flow.response.__dict__
-        print flow.response.headers.__dict__ #convert headers for python dict
-        print flow.response.headers['Content-Type'] # get content type
-         
-        #every HTTP response before it is returned to the client
-        with decoded(flow.response):
-            print flow.response.content # content html
-            flow.response.content.replace('</body>','<h1>injected</h1></body>') # replace content tag 
-       
-        del flow.response.headers["X-XSS-Protection"] # remove protection Header
-        
-        flow.response.headers["newheader"] = "foo" # adds a new header
-        #and the new header will be added to all responses passing through the proxy
-```
-#### About plugins
-[plugins](https://github.com/P0cL4bs/WiFi-Pumpkin/wiki/Plugins) on the wiki 
+### Method 3: Using pipx (Alternative)
 
-### TCP-Proxy Server
-A proxy that you can place between in a TCP stream. It filters the request and response streams with ([scapy](http://www.secdev.org/projects/scapy/) module) and actively modify packets of a TCP protocol that gets intercepted by WiFi-Pumpkin. this plugin uses modules to view or modify the intercepted data that possibly easiest implementation of a module, just add your custom module on  "plugins/analyzers/" automatically will be listed on TCP-Proxy tab.
+If you prefer not to create a virtual environment:
 
-``` python
-from scapy.all import *
-from scapy_http import http # for layer HTTP
-from default import PSniffer # base plugin class
+1. Install pipx:
+   ```bash
+   sudo apt install pipx
+   ```
 
-class ExamplePlugin(PSniffer):
-    _activated     = False
-    _instance      = None
-    meta = {
-        'Name'      : 'Example',
-        'Version'   : '1.0',
-        'Description' : 'Brief description of the new plugin',
-        'Author'    : 'your name',
-    }
-    def __init__(self):
-        for key,value in self.meta.items():
-            self.__dict__[key] = value
+2. Run modernize with pipx:
+   ```bash
+   pipx run modernize -w .
+   ```
 
-    @staticmethod
-    def getInstance():
-        if ExamplePlugin._instance is None:
-            ExamplePlugin._instance = ExamplePlugin()
-        return ExamplePlugin._instance
+## Post-Conversion Steps
 
-    def filterPackets(self,pkt): # (pkt) object in order to modify the data on the fly
-        if pkt.haslayer(http.HTTPRequest): # filter only http request 
-        
-            http_layer = pkt.getlayer(http.HTTPRequest) # get http fields as dict type
-            ip_layer = pkt.getlayer(IP)# get ip headers fields as dict type
-            
-            print http_layer.fields['Method'] # show method http request
-            # show all item in Header request http
-            for item in http_layer.fields['Headers']:
-                print('{} : {}'.format(item,http_layer.fields['Headers'][item]))
-            
-            print ip_layer.fields['src'] # show source ip address 
-            print ip_layer.fields['dst'] # show destiny ip address 
-            
-            print http_layer # show item type dict
-            print ip_layer # show item type dict
-            
-            return self.output.emit({'name_module':'send output to tab TCP-Proxy'}) 
+After running the automated conversion tools, manual intervention is likely needed:
 
-```
-#### About TCP-Proxy
-[TCP-Proxy](https://github.com/P0cL4bs/WiFi-Pumpkin/wiki/TCP-PProxy) on the wiki 
+1. Fix imports:
+   - Update deprecated module imports
+   - Handle renamed modules (e.g., `Queue` to `queue`)
 
-### Screenshots
-[Screenshot](https://github.com/P0cL4bs/WiFi-Pumpkin/wiki/Screenshots) on the wiki 
+2. Address string/bytes issues:
+   - Python 3 distinguishes between strings (Unicode) and bytes
+   - Fix string encoding/decoding issues
 
-### FAQ
-[FAQ](https://github.com/P0cL4bs/WiFi-Pumpkin/wiki/FAQ) on the wiki
+3. Update iterator methods:
+   - Replace `.iteritems()`, `.iterkeys()`, `.itervalues()` with `.items()`, `.keys()`, `.values()`
 
-### Contact Us
-Whether you want to report a [bug](https://github.com/P0cL4bs/WiFi-Pumpkin/issues/new), send a patch or give some suggestions on this project, drop us or open [pull requests](https://github.com/P0cL4bs/WiFi-Pumpkin/pulls) 
+4. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+5. Test functionality:
+   - Run unit tests if available
+   - Test main features to verify they work as expected
+
+## Common Issues and Fixes
+
+### Print Statements
+- Python 2: `print "Hello"`
+- Python 3: `print("Hello")`
+
+### Unicode Handling
+- Python 2: Uses ASCII strings by default
+- Python 3: Uses Unicode strings by default
+
+### Division Operator
+- Python 2: Integer division by default (`5 / 2 = 2`)
+- Python 3: Float division by default (`5 / 2 = 2.5`)
+
+### Exception Syntax
+- Python 2: `except Exception, e:`
+- Python 3: `except Exception as e:`
+
+### Range vs xrange
+- Python 2: Both `range()` and `xrange()`
+- Python 3: Only `range()` (behaves like the old `xrange()`)
+
+## Contributing
+
+Contributions to improve the Python 3 compatibility are welcome:
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+## Known Limitations
+
+- Some external dependencies may still require Python 2
+- Network interface handling might differ between Python 2 and 3
+- Some third-party libraries used by WiFiPumpkin might not be compatible with Python 3
+
+## License
+
+This project maintains the same license as the original WiFiPumpkin repository.
