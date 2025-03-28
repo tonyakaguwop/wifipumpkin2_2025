@@ -16,7 +16,7 @@ The `2to3` tool is included with Python 3 and automates much of the conversion p
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/tonyakaguwop/wifipumpkin.git
+   git clone https://github.com/tonyakaguwop/wifipumpkin2_2025.git
    cd wifipumpkin
    ```
 
